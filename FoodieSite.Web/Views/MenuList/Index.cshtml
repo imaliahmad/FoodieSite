@@ -1,0 +1,119 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section>
+    <div class="container">
+        <div class="row" id="menuItemsDiv">
+           @* <img src="~/images/loader-gif.gif" id="loaderGif" />*@
+            <div id="cardTemplateColumn" class="visually-hidden">
+                <div class="col-md-3 mb-3">
+                    <div class="card">
+                        <img src="./images/spinner-icon-gif-17.jpg" class="card-img-top p-3" alt="...">
+                        <div class="card-body  text-center">
+                            <h5 class="card-title">Tasty Food</h5>
+                            <p class="card-text">$ 150</p>
+                            <a href="#" class="btn btn-primary card-btn btn-block">Add To Cart</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+  
+    $(document).ready(() => {
+     LoadMenuItems();
+    });
+
+    function LoadMenuItems()
+    {
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetMenuItems", "Home")',
+            async: true,
+            success: async function (result) {
+                var row = '';
+                for (var i = 0; i < result.length; i++) {
+
+                    row += `<div class="col-md-3 mb-3">
+                                      <div class="card">
+                                          <img src="./images/spinner-icon-gif-17.jpg" class="card-img-top p-3" alt="...">
+                                          <div class="card-body  text-center">
+                                              <h5 class="card-title">${result[i].name}</h5>
+                                              <p class="card-text">$${result[i].salePrice}</p>
+                                              <a href="#" class="btn btn-primary card-btn btn-block" data-itemId="${result[i].itemMasterId}">Add To Cart</a>
+                                          </div>
+                                      </div>
+                                   </div>`;
+
+                    //debugger;
+                    //var $cardHtml = $('#cardTemplateColumn').clone();
+
+                    //var itemName = result[i].name;
+                    //var price = result[i].salePrice;
+
+                    //$cardHtml.find('.card-title').text(result[i].name);
+                    //$cardHtml.find('.card-text').text("$" + result[i].salePrice);
+                    //$cardHtml.find('.card-btn').attr('data-itemId', result[i].itemMasterId);
+
+                    //await $('#menuItemsDiv').append($cardHtml.html());
+                   /*$('#loaderGif').css('display', 'none');*/
+                }
+                $('#menuItemsDiv').append(row);
+
+                setTimeout(function () {
+                    LoadActualImage(result);
+                }, 1000);
+
+              
+                //const itemNames = result.map(x => x.name);
+                //console.log(itemNames);
+
+                //add menu items with loader image
+                //pass data to loadImage function
+               // LoadActualImage(result);
+                //debugger;
+
+             //   var actualIamge = `<img src="data:image/jpg;base64," + ${img.toString()} height="50" width="50" />`;
+
+
+
+                //Bind with cards one by one
+            },
+            error: function (err) { alert(err); }
+        });
+    }
+
+    function LoadActualImage(result) {
+       
+        for (var i = 0; i < result.length; i++) {
+             // var result = "";
+
+            debugger;
+            console.log(result[i]);
+             $.ajax({
+                 type: 'GET',
+                 url: '@Url.Action("GetImageByItemId", "Home")',
+                 data: { imageId: result[i].imageMasterId },
+                 async: false,
+                 success: function (response) {
+                   //  console.log(response);
+                     console.log(result[i].itemMasterId);
+
+                     $('#menuItemsDiv').find(`a[data-itemId=${result[i].itemMasterId}]`)
+                         .closest('.card').find('img')
+                         .attr('src', "data:image/jpg;base64," + response.filePath);
+                 },
+                 error: function (error) { alert(error); }
+             });
+        }
+    }
+</script>
+

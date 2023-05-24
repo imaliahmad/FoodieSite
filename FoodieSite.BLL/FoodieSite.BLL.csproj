@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoodieSite.BOL\FoodieSite.BOL.csproj" />
+    <ProjectReference Include="..\FoodieSite.DAL\FoodieSite.DAL.csproj" />
+    <ProjectReference Include="..\FoodieSite.ViewModels\FoodieSite.ViewModels.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,202 @@
+﻿
+@model FoodieSite.ViewModels.CategoryMasterVM;
+
+@{
+    ViewData["Title"] = "Index";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+<script src="~/js/site.js"></script>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="white-box">
+                <h3 class="box-title">Category Form</h3>
+                <a id="CreateNew" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus-square"></i>
+                    Create New
+                </a>
+                <br /><br />
+                <form class="row mt-3 form-horizontal form-material" id="categoryMasterForm">
+                    <input type="hidden" asp-for="CategoryMasterId" value="" />
+
+                    <div class="col-md-12">
+                              <div class="form-group">
+                                  <label class="form-label">Name</label>
+                                  <div class="border-bottom">
+                                      <input class="form-control border-0" placeholder="Enter name" asp-for="Name" />
+                                  </div>
+                              </div>
+                          </div>
+                    <div class="col-md-12">
+                              <div class="form-group">
+                                  <label class="form-label">Description</label>
+                                  <div class="border-bottom">
+                                      <input class="form-control border-0" placeholder="Enter description" asp-for="Description" />
+                                  </div>
+                              </div>
+                          </div>
+                    <div class="col-md-12 mt-2 mb-3">
+                              <button type="button" id="btnSave" class="btn btn-success text-white">
+                                  <i class="fa-solid fa-floppy-disk"></i>
+                                  Save
+                              </button>
+                          </div>
+                </form>
+                <br /><br />
+                <h3 class="box-title">Categorys List</h3>
+                <table class="table text-nowrap">
+                    <thead>
+                        <tr>
+                            <th class="fw-bold">Category Id</th>
+                            <th class="fw-bold">Name</th>
+                            <th class="fw-bold">Description</th>
+                            <th class="fw-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+   
+</div>
+
+<script>
+    $(document).ready(function () {
+        GetCategorysList();
+        var currentRow;
+    });
+
+    $('#CreateNew').click(function () {
+        $('form :input').val('');
+        $('#categoryMasterForm')[0].reset();
+    });
+
+    function GetCategorysList() {
+        //debugger;
+        $.ajax({
+            method: 'GET',
+            url: '@Url.Action("GetCategorysList", "Category")',
+            success: function (response) {
+                //debugger;
+                if (response != undefined) {
+
+                    if (response.status) {
+                        var data = response.data;
+                        for (var i = 0; i < data.length; i++) {
+                            var html = `<tr>
+                                     <td>${data[i].categoryMasterId}</td>
+                                     <td>${data[i].name}</td>
+                                     <td>${data[i].description}</td>
+                                     <td>
+                                        <button type='button' class='btn btn-warning text-dark'  onclick='Edit(${data[i].categoryMasterId}, this)'><i class="fa-solid fa-edit"></i></button> |
+                                        <button type='button' class='btn btn-danger text-dark' onclick='Delete(${data[i].categoryMasterId}, this)'><i class="fa-solid fa-trash-can"></i></button>
+                                     </td>
+                                </tr>`;
+
+
+                            $('#categoryList').append(html);
+                        }
+                    }
+                    else {
+                        notyf.open({ type: 'error', message: response.message });
+                    }
+                }
+                else {
+                    notyf.open({ type: 'error', message: 'Failed to get category list.' });
+                }
+
+            },
+            error: function (err) { notyf.open({ type: 'error', message: err.statusText }); }
+        });
+    }
+
+    $('#btnSave').click(function () {
+        //debugger;
+        var _categoryId = $('#CategoryMasterId').val();
+        var _name = $('#Name').val();
+        var _description = $('#Description').val();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveCategory", "Category")',
+            data: $('#categoryMasterForm').serialize(),
+            success: function (response) {
+                console.log(response);
+                if (response.status == true) {
+                    if (_categoryId != "") {
+                        //debugger;
+                        var col1 = currentRow.find("td:eq(0)").text(); // get current row 1st TD value
+                        var col2 = currentRow.find("td:eq(1)").text(); // get current row 2nd TD
+
+                        currentRow.find("td:eq(1)").text(_name);
+                        currentRow.find("td:eq(2)").text(_description);
+                    }
+                    else {
+                        //debugger;
+                        var data = response.data;
+                        if (data != undefined) {
+                                var html = `<tr>
+                                                <td>${data.categoryMasterId}</td>
+                                                <td>${data.name}</td>
+                                                <td>${data.description}</td>
+                                                <td>
+                                                   <button type='button' class='btn btn-warning text-dark' onclick='Edit(${data.categoryMasterId}, this)'><i class="fa-solid fa-edit"></i></button> |
+                                                   <button type='button' class='btn btn-danger text-dark' onclick='Delete(${data.categoryMasterId}, this)'><i class="fa-solid fa-trash-can"></i></button>
+                                                </td>
+                                            </tr>`;
+
+                                $('#categoryList').append(html);
+
+                        }
+                        else {
+                            notyf.open({ type: 'error', message: 'Could not bind data with grid.' });
+                        }
+                    }
+
+                    notyf.open({ type: 'success', message: 'Record saved successfully.' });
+                    $('form :input').val('');
+                    $('#categoryMasterForm')[0].reset();
+                    
+                }
+                else {
+                    notyf.open({ type: 'error', message: response.message });
+                }
+            },
+            error: function (err) { notyf.open({ type: 'error', message: err.statusText }); }
+        });
+
+    });
+
+    function Edit(id, element) {
+        //debugger;
+        currentRow = $(element).closest('tr');
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("Edit", "Category")',
+            data: { cid: id },
+            success: function (response) {
+                console.log(response);
+                //debugger;
+
+                if (response.status == true) {
+                    var data = response.data;
+
+                    if (data != undefined) {
+                        $('#CategoryMasterId').val(data.categoryMasterId);
+                        $('#Name').val(data.name);
+                        $('#Description').val(data.description);
+                    }
+                    else {
+                        notyf.open({ type: 'error', message: response.message });
+                    }
+                }
+            },
+            error: function (err) {
+                notyf.open({ type: 'error', message: err.statusText });
+            }
+        });
+    }
+</script>

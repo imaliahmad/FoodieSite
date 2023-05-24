@@ -1,0 +1,346 @@
+﻿
+@model FoodieSite.ViewModels.ItemMasterVM;
+
+@{
+    ViewData["Title"] = "Index";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-4 col-xlg-3 col-md-12">
+            <div class="white-box">
+                <div class="user-bg">
+                    <input type="file" hidden name="ItemImage" multiple id="ItemImage" onchange="userAction.UploadImage()" />
+                    <img width="100%" alt="user" id="ItemImageDiv" src="~/AmpleBs5Theme/plugins/images/large/img1.jpg">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="userAction.SelectImage()">Choose File</button>
+        </div>
+        <div class="col-lg-8 col-xlg-9 col-md-12">
+            <div class="white-box">
+                <h3 class="box-title">Items Form</h3>
+                <a id="CreateNew" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus-square"></i>
+                    Create New
+                </a>
+                <br /><br />
+                <form class="row mt-3 form-horizontal form-material" id="itemMasterForm">
+                    <input type="hidden" asp-for="ItemMasterId" value="" />
+                    <input type="hidden" asp-for="ImageMasterId" />
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <div class="border-bottom">
+                                <input class="form-control border-0" placeholder="Enter name" asp-for="Name" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <div class="border-bottom">
+                                <input class="form-control border-0" placeholder="Enter description" asp-for="Description" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Sale Price</label>
+                            <div class="border-bottom">
+                                <input class="form-control border-0" placeholder="Enter price" asp-for="SalePrice" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Select Category</label>
+                            <div class="border-bottom">
+                                <select class="form-select shadow-none p-0 border-0 form-control-line" asp-items="ViewBag.CategoryList" asp-for="CategoryMasterId">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-2 mb-3">
+                   <button type="button" onclick="userAction.SaveItem()" class="btn btn-success">
+                       <i class="fa-solid fa-floppy-disk"></i>
+                       Save
+                   </button>
+            </div>
+                </form>
+                
+            </div>
+        </div>
+     </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="white-box">
+                <h3 class="box-title" id="listTitle"></h3>
+                <a onclick="userAction.GetItemsList(0)" class="btn btn-dark btn-sm">All</a> |
+                <a onclick="userAction.GetItemsList(1)" class="btn btn-success btn-sm">Approved</a> |
+                <a onclick="userAction.GetItemsList(2)" class="btn btn-danger btn-sm">Rejected</a> |
+                <a onclick="userAction.GetItemsList(3)" class="btn btn-warning btn-sm">Pending</a>
+                <br /><br />
+                <table class="table text-nowrap">
+                    <thead>
+                        <tr>
+                            <th class="fw-bold">Item Id</th>
+                            <th class="fw-bold">Name</th>
+                            <th class="fw-bold">Description</th>
+                            <th class="fw-bold">Sale Price</th>
+                            <th class="fw-bold">Status</th>
+                            <th class="fw-bold">Category</th>
+                            <th class="fw-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+        
+        @*<form class="row" id="itemMasterForm">
+            <input type="hidden" asp-for="ItemMasterId" value="" />
+            <div class="col-md-4 mb-3">
+                <label for="Name" class="form-label">Name</label>
+                <input class="form-control" asp-for="Name">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="Description" class="form-label">Description</label>
+                <input class="form-control" asp-for="Description">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="SalePrice" class="form-label">Sale Price</label>
+                <input class="form-control" asp-for="SalePrice">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="CategoryId" class="form-label">Category</label>
+                <select class="form-control" asp-items="ViewBag.CategoryList" asp-for="CategoryMasterId">
+                    <option value="">-- Select Category --</option>
+                </select>
+            </div>
+            <br />
+            <div class="col-md-6 mb-3">
+                <label for="ImageId" class="form-label">Image</label>
+                <input type="file" id="ItemImage" class="form-control" onchange="userAction.UploadImage()" />
+                <input type="hidden" asp-for="ImageMasterId" />
+            </div>
+            <div class="col-md-12 mt-2 mb-3">
+                <button type="button" onclick="userAction.SaveItem()" class="btn btn-success">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save
+                </button>
+            </div>
+        </form>
+        <br /><br />
+        <h3 class="text-primary" id="listTitle"></h3>
+        <a onclick="userAction.GetItemsList(0)" class="btn btn-dark btn-sm">All</a> |
+        <a onclick="userAction.GetItemsList(1)" class="btn btn-success btn-sm">Approved</a> |
+        <a onclick="userAction.GetItemsList(2)" class="btn btn-danger btn-sm">Rejected</a> |
+        <a onclick="userAction.GetItemsList(3)" class="btn btn-warning btn-sm">Pending</a>
+        <br /><br />
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Item Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Sale Price</th>
+                    <th>Status</th>
+                    <th>Category</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="itemList">
+            </tbody>
+        </table>*@
+    </div>
+
+<script>
+    $(document).ready(function () {
+        userAction.GetItemsList(0);
+        var currentRow;
+    });
+    $('#CreateNew').click(function () {
+        $('form :input').val('');
+        $('#itemMasterForm')[0].reset();
+    });
+
+    var userAction = {
+        GetItemsList: function (statusId) {
+            //debugger;
+            var _statusId = 0;
+            if (statusId == "" || statusId == undefined) {
+                _statusId = statusId;
+            }
+            
+        $.ajax({
+            method: 'GET',
+            url: '@Url.Action("GetItemsList", "Items")',
+            data: { statusId: _statusId},
+            success: function (response) {
+                //debugger;
+                if (response != undefined) {
+
+                    if (response.status == true) {
+                        
+                        console.log(response.title);
+                        $('#listTitle').text(response.title);
+
+                        let count = response.data.length;
+                        $('#itemList').html('');
+
+                       for (var i = 0; i < count; i++) {
+                          
+                        var html = `<tr>
+                                     <td>${response.data[i].itemMasterId}</td>
+                                     <td>${response.data[i].name}</td>
+                                     <td>${response.data[i].description}</td>
+                                     <td>${response.data[i].salePrice}</td>
+                                     <td>${response.data[i].status}</td>
+                                     <td>${response.data[i].categoryMaster.name}</td>
+                                     <td>
+                                        <button type='button' class='btn btn-warning'onclick='Edit(${response.data[i].itemMasterId}, this)'><i class="fa-solid fa-edit"></i></button> |
+                                        <button type='button' class='btn btn-danger' onclick='Delete(${response.data[i].itemMasterId}, this)'><i class="fa-solid fa-trash-can"></i></button>
+                                     </td>
+                                   </tr>`;
+
+                            $('#itemList').append(html);
+                        }
+                    }
+                    else {
+                        notyf.open({ type: 'error', message: response.message });
+                    }
+                }
+                else {
+                    notyf.open({ type: 'error', message: 'Failed to get category list.' });
+                }
+
+            },
+            error: function (err) { notyf.open({ type: 'error', message: err.statusText }); }
+        });
+        },
+        SaveItem: function () {
+             //debugger;
+            var _itemId = $('#ItemMasterId').val();
+            var _name = $('#Name').val();
+            var _description = $('#Description').val();
+            var _salePrice = $('#SalePrice').val();
+            var _categoryId = $('#CategoryMasterId').val();
+            var _categoryText = $('#CategoryMasterId').text();
+
+             $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveItem", "Items")',
+            data: $('#itemMasterForm').serialize(),
+            success: function (response) {
+                //debugger;
+                if (response.status == true) {
+                    if (_itemId != "") {
+                        //debugger;
+                        var col1 = currentRow.find("td:eq(0)").text(); // get current row 1st TD value
+                        var col2 = currentRow.find("td:eq(1)").text(); // get current row 2nd TD
+
+                        currentRow.find("td:eq(1)").text(_name);
+                        currentRow.find("td:eq(2)").text(_description);
+                        currentRow.find("td:eq(3)").text(_salePrice);
+                        currentRow.find("td:eq(4)").text(_categoryText);
+                    }
+                    else {
+                        //debugger;
+                        var data = response.data;
+                        if (data != undefined) {
+                                var html = `<tr>
+                                                <td>${data.itemMasterId}</td>
+                                                <td>${data.name}</td>
+                                                <td>${data.description}</td>
+                                                <td>${data.salePrice}</td>
+                                                <td>${data.categoryMasterId}</td>
+                                                <td>
+                                                   <button type='button' class='btn btn-warning' onclick='Edit(${data.itemMasterId}, this)'><i class="fa-solid fa-edit"></i></button> |
+                                                   <button type='button' class='btn btn-danger' onclick='Delete(${data.itemMasterId}, this)'><i class="fa-solid fa-trash-can"></i></button>
+                                                </td>
+                                            </tr>`;
+
+                            $('#itemList').append(html);
+
+                        }
+                        else {
+                            notyf.open({ type: 'error', message: 'Could not bind data with grid.' });
+                        }
+                    }
+
+                    notyf.open({ type: 'success', message: 'Record saved successfully.' });
+                }
+                else {
+                    notyf.open({ type: 'error', message: response.message });
+                }
+
+                $('form :input').val('');
+                $('#itemMasterForm')[0].reset();
+            },
+            error: function (err) { notyf.open({ type: 'error', message: err.statusText }); }
+        });
+             
+              notyf.dismissAll();
+        },
+        SelectImage: function () {
+            $('#ItemImage').trigger('click');
+        },
+        UploadImage: function () {
+            var file = document.getElementById("ItemImage").files[0];
+
+            //Extension Validations
+            var validImageExtensions = ["png", "jpg", "jpeg"];
+            var isImageValid = true;
+
+            var fileName = file.name;
+            var extension = fileName.split('.').pop();
+            if ($.inArray(extension, validImageExtensions) == -1) {
+                isImageValid = false;
+            }
+
+            if (isImageValid) {
+                //ajax call
+                var formData = new FormData();
+                formData.append("Image", file);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("UploadSingleFile", "Common")',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        //debugger;
+                        if (res != undefined) {
+                            if (res.status) {
+                                $('#ImageMasterId').val(res.data.imageId);
+                                $('#ItemImageDiv').attr("src", 'data:image/jpeg;base64,' + res.data.filePath);
+                            }
+                            else {
+                                alert(res.message);
+                            }
+                        }
+                        else {
+                            alert('something went wrong.');
+                        }
+                    },
+                    error: function (error) {
+                        alert(error);
+                    }
+                });
+            }
+            else {
+                alert('only images are allowed.');
+            }
+
+        }
+    };
+</script>

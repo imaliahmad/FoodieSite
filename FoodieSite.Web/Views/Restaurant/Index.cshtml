@@ -1,0 +1,259 @@
+﻿@model FoodieSite.ViewModels.RestaurantMasterVM;
+
+@{
+    ViewData["Title"] = "Index";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<script src="~/js/site.js"></script>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="white-box">
+                <h3 class="box-title">Restaurant Form</h3>
+                <a id="CreateNew" class="btn btn-primary">
+                    <i class="fas fa-plus-square"></i>
+                    Create New
+                </a>
+                <form class="row mt-3 form-horizontal form-material" id="restaurantMasterForm">
+                    <input type="hidden" asp-for="RestaurantMasterId" value="" />
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <div class="border-bottom">
+                                <input type="text" class="form-control border-0" placeholder="Enter name" asp-for="Name" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Contact</label>
+                            <div class="border-bottom">
+                                <input type="email" class="form-control border-0" placeholder="Enter contact" asp-for="ContactNo"/>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <div class="border-bottom">
+                                <input class="form-control border-0" placeholder="Enter email" asp-for="Email" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <div class="border-bottom">
+                                <input class="form-control border-0" placeholder="Enter address" asp-for="Address" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-2 mb-3">
+                        <button type="button" id="btnSave" class="btn btn-success text-white">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Save
+                        </button>
+                    </div>
+                </form>
+                <hr class="mt-4 mb-4" />
+                <h3 class="box-title">Restaurant Detail</h3>
+                <table class="table text-nowrap">
+                    <thead>
+                        <tr>
+                            <th class="fw-bold">Restaurant Id</th>
+                            <th class="fw-bold">Name</th>
+                            <th class="fw-bold">Contact</th>
+                            <th class="fw-bold">Email</th>
+                            <th class="fw-bold">Address</th>
+                            <th class="fw-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="restaurantList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+    $(document).ready(function () {
+        GetRestaurantList();
+        var currentRow;
+    });
+
+    $('#CreateNew').click(function () {
+        $('form :input').val('');
+        $('#restaurantMasterForm')[0].reset();
+    });
+
+    function GetRestaurantList() {
+        //debugger;
+        $.ajax({
+            method: 'GET',
+            url: '@Url.Action("GetRestaurantList", "Restaurant")',
+            success: function (response) {
+                //debugger;
+                if (response != undefined) {
+
+                    if (response.status) {
+                        var data = response.data;
+                        for (var i = 0; i < data.length; i++) {
+                            var html = `<tr>
+                                     <td>${data[i].restaurantMasterId}</td>
+                                     <td>${data[i].name}</td>
+                                     <td>${data[i].contactNo}</td>
+                                     <td>${data[i].email}</td>
+                                     <td>${data[i].address}</td>
+                                     <td>
+                                        <button type='button' class='btn btn-warning text-dark'  onclick='Edit(${data[i].restaurantMasterId}, this)'><i class="far fa-edit"></i></button> |
+                                        <button type='button' class='btn btn-danger text-dark' onclick='Delete(${data[i].restaurantMasterId}, this)'><i class="fas fa-trash"></i></button>
+                                     </td>
+                                </tr>`;
+
+                            $('#restaurantList').append(html);
+                        }
+                    }
+                    else {
+                        notyf.open({ type: 'error', message: response.message });
+                    }
+                }
+                else {
+                    notyf.open({ type: 'error', message: 'Failed to get restaurant list.' });
+                }
+
+            },
+            error: function (err) { notyf.open({ type: 'error', message: err.statusText }); }
+        });
+    }
+
+    $('#btnSave').click(function () {
+        //debugger;
+        var _restaurantId = $('#RestaurantMasterId').val();
+        var _name = $('#Name').val();
+        var _contact = $('#ContactNo').val();
+        var _email = $('#Email').val();
+        var _address = $('#Address').val();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SaveRestuarant", "Restaurant")',
+            data: $('#restaurantMasterForm').serialize(),
+            success: function (response) {
+                console.log(response);
+                if (response.status == true) {
+                    if (_restaurantId != "") {
+                       // //debugger;
+                        var col1 = currentRow.find("td:eq(0)").text(); // get current row 1st TD value
+                        var col2 = currentRow.find("td:eq(1)").text(); // get current row 2nd TD
+
+                        currentRow.find("td:eq(1)").text(_name);
+                        currentRow.find("td:eq(2)").text(_contact);
+                        currentRow.find("td:eq(3)").text(_email);
+                        currentRow.find("td:eq(4)").text(_address);
+
+                        $('form :input').val('');
+                        $('#restaurantMasterForm')[0].reset();
+                        notyf.open({ type: 'success', message: response.message});
+                    }
+                    else {
+                        // //debugger;
+                        var data = response.data;
+                        if (data != undefined) {
+                                var html = `<tr>
+                                                <td>${data.restaurantMasterId}</td>
+                                                <td>${data.name}</td>
+                                                <td>${data.contactNo}</td>
+                                                <td>${data.email}</td>
+                                                <td>${data.address}</td>
+                                                <td>
+                                                   <button type='button' class='btn btn-warning text-dark' onclick='Edit(${data.restaurantMasterId}, this)'><i class="far fa-edit"></i></button> |
+                                                   <button type='button' class='btn btn-danger text-dark' onclick='Delete(${data.restaurantMasterId}, this)'><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>`;
+                                
+                                $('form :input').val('');
+                                $('#restaurantList').append(html);
+                                $('#restaurantMasterForm')[0].reset();
+                                notyf.open({ type: 'success', message: response.message });
+
+                        }
+                        else {
+                            notyf.open({ type: 'error', message: 'Could not bind data with grid.' });
+                        }
+                    }
+                }
+                else {
+                    notyf.open({ type: 'error', message: response.message });
+                }
+
+                
+            },
+            error: function (err) { notyf.open({ type: 'error', message: err.statusText }); }
+        });
+
+    });
+
+    function Edit(id, element) {
+
+        //debugger;
+        currentRow = $(element).closest('tr');
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("Edit", "Restaurant")',
+            data: { rid: id },
+            success: function (response) {
+                console.log(response);
+                //debugger;
+
+                if (response.status == true) {
+                    var data = response.data;
+
+                    if (data != undefined) {
+                        $('#RestaurantMasterId').val(data.restaurantMasterId);
+                        $('#Name').val(data.name);
+                        $('#ContactNo').val(data.contactNo);
+                        $('#Email').val(data.email);
+                        $('#Address').val(data.address);
+                    }
+                    else {
+                        notyf.open({ type: 'error', message: response.message });
+                    }
+                }
+            },
+            error: function (err) {
+                notyf.open({ type: 'error', message: err.statusText });
+            }
+        });
+    }
+    @*function Delete(id, element) {
+        //debugger;
+        console.log(element);
+        currentRow = $(element).closest('tr');
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("DeleteTemplate","Common")',
+            data: { tid: id },
+            success: function (response) {
+                if (response.status == true) {
+                    //debugger;
+                    currentRow.remove();
+                }
+                else {
+                    alert('Error: ' + response.message);
+                }
+
+            },
+            error: function (err) {
+                alert(err);
+            }
+        });
+        //alert(id);
+    }*@
+</script>
